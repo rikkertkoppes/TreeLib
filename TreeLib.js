@@ -1,4 +1,12 @@
-var TreeLib = (function() {
+(function exporter(root, name, factory) {
+    if (typeof exports === 'object') {
+        module.exports = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        define(name,factory);
+    } else {
+        root[name] = factory();
+  }
+}(this, 'TreeLib', function factory() {
 
     /**
      * depth first tree walker
@@ -77,4 +85,4 @@ var TreeLib = (function() {
         paths: paths,
         Tree: Tree
     };
-}());
+}));
