@@ -35,6 +35,89 @@
     }
 
     /**
+     * reverse walk, visits the deepest nodes first and walks back up the tree
+     * the callback method takes a node, depth and result set of the deeper
+     * callbacks. This walker can thus be used to count children or apply a
+     * reduce method up the tree
+     * @param  {object||array}   tree     the tree to walk, can be an object or undefined, in which case there is no root node
+     * @param  {Function(node,depth,res)} callback callback gets the tree node, depth
+     * and result of deeper callbacks
+     * @param  {String}   children (optional) attribute containing children, defaults to 'children'
+     * @return {mixed}            result of the last callback(s)
+     */
+    function reverseWalk(tree,callback,children) {
+        function _walk(tree,depth) {
+            var sub = tree[children||'children']||[];
+            var res = [];
+            sub.forEach(function(child) {
+                var r = _walk(child,depth+1);
+                if (r!==undefined) {
+                    res.push(r);
+                }
+            });
+
+            return callback(tree,depth,res.length?res:undefined);
+        }
+
+        if (tree instanceof Array) {
+            var res = [];
+            tree.forEach(function(child) {
+                res.push(_walk(child,0));
+            });
+            return res;
+        } else {
+            return _walk(tree,0);
+        }
+    }
+
+    /**
+     * copy function from angular.cop
+     * @param  {[type]} source      [description]
+     * @param  {[type]} destination [description]
+     * @return {[type]}             [description]
+     */
+    function copy(source){
+        var destination;
+        if (source instanceof Array) {
+            destination = [];
+            for (var i = 0; i < source.length; i++) {
+                destination.push(copy(source[i]));
+            }
+        } else if (source !== null && typeof source == 'object') {
+            destination = {};
+            for (var key in source) {
+                destination[key] = copy(source[key]);
+            }
+        } else {
+            return source;
+        }
+        return destination;
+    }
+
+    function filter(tree,callback,children) {
+        tree = copy(tree);
+        children = children||'children';
+
+        function _filterNode(node) {
+            //filter children
+            node[children] = filter(node[children]||[],callback,children);
+            //remove empty children
+            if (!node[children].length) {
+                delete node[children];
+            }
+            return node;
+        }
+
+        if (!(tree instanceof Array)) {
+            return _filterNode(tree);
+        }
+        return tree.filter(function(node) {
+            _filterNode(node);
+            return (callback(node) || node[children]);
+        });
+    }
+
+    /**
      * depth first flatten tree, children are maintained
      * @param  {object|array} tree     tree to flatten, or array of trees
      * @param  {String} children (optional) attribute containing the children, defaults to 'children'
@@ -71,6 +154,15 @@
         return this;
     };
 
+    Tree.prototype.reverseWalk = function(callback) {
+        reverseWalk(this.tree,callback,this.childrenProp);
+        return this;
+    };
+
+    Tree.prototype.filter = function(callback) {
+        return filter(this.tree,callback,this.childrenProp);
+    };
+
     Tree.prototype.flatten = function() {
         return flatten(this.tree,this.childrenProp);
     };
@@ -81,8 +173,11 @@
 
     return {
         walk: walk,
+        reverseWalk: reverseWalk,
         flatten: flatten,
         paths: paths,
+        filter: filter,
+        copy: copy,
         Tree: Tree
     };
 }));

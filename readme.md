@@ -55,6 +55,39 @@ Walks the tree, calling callback for each node with three arguments:
 
 The `children` argument is optional and should be a string indicating the property used for the children array. This defaults to 'children'.
 
+###Reverse walking
+
+Depth first reverse tree walking
+
+    TreeLib.reverseWalk(tree,callback[,children]);
+
+Walks the tree in reverse order, calling the callback for each node with three arguments:
+
+- node: the current node in the tree, unaltered, so it still includes the children
+- depth: the current depth of the node, starting at 0
+- res: result of the (already executed) callbacks on the node's children, or undefined if it has none.
+
+One can use the res argument to do a reduce on the tree
+
+    function sum(prev,curr) {
+        return prev + curr;
+    }
+
+    var total = TreeLib.reverseWalk(tree,function(node,depth,res) {
+        //return the sum of the values in res, or some measure
+        return res ? res.reduce(sum) : node.count;
+    });
+
+
+
+###Filtering
+
+Filter the tree. When filtered, all nodes that do not match AND do not have matching decendants will be removed. This method works on a copy of the tree
+
+    TreeLib.filter(tree,filter[,children])
+
+The filter argument should be a function that takes a single argument: `node`, and returns a boolean. Depending on the result, the node will be filtered out if it has no matching decendants.
+
 ###Flattening
 
 Flattens the tree into an array (depth first)
@@ -76,5 +109,7 @@ A tree can be wrapped in an object, which exposes the above functions as methods
 Exposes
 
 - `Tree.walk(callback)`
+- `Tree.reverseWalk(callback)`
+- `Tree.filter(callback)`
 - `Tree.flatten()`
 - `Tree.paths()`
