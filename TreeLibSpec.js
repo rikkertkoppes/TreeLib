@@ -188,6 +188,21 @@ describe('test', function() {
         });
     });
 
+    describe('levels', function() {
+        it('should get the levels of a tree without root', function() {
+            var res = TreeLib.levels(testTreeNoRoot);
+            expect(res[0]).toEqual([foo, qux]);
+            expect(res[1]).toEqual([foobar, foobaz, quxmoo, quxfox]);
+        });
+        it('should get the levels of a tree with root', function() {
+            var root = testTreeWithRoot;
+            var res = TreeLib.levels(root);
+            expect(res[0]).toEqual([root]);
+            expect(res[1]).toEqual([foo, qux]);
+            expect(res[2]).toEqual([foobar, foobaz, quxmoo, quxfox]);
+        });
+    });
+
     describe('paths', function() {
         it('should get the paths of a tree without root', function() {
             var res = TreeLib.paths(testTreeNoRoot);
@@ -228,7 +243,14 @@ describe('test', function() {
             var tree = new TreeLib.Tree(testTreeNoRoot);
             expect(tree.paths()).toEqual(TreeLib.paths(testTreeNoRoot));
         });
-
+        it('should yield the same for levels', function() {
+            var tree = new TreeLib.Tree(testTreeWithRoot);
+            expect(tree.levels()).toEqual(TreeLib.levels(testTreeWithRoot));
+        });
+        it('should yield the same for levels', function() {
+            var tree = new TreeLib.Tree(testTreeNoRoot);
+            expect(tree.levels()).toEqual(TreeLib.levels(testTreeNoRoot));
+        });
 
         function filterFN(node) {
             return node.name === 'quxmoo';

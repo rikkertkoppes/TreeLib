@@ -100,6 +100,12 @@ Returns all the paths of the tree as an array (depth first)
 
     TreeLib.paths(tree[,children])
 
+###Levels
+
+Return the a flattened tree by depth
+
+    TreeLib.levels(tree,[,children])
+
 ###Tree Objects
 
 A tree can be wrapped in an object, which exposes the above functions as methods
@@ -113,3 +119,4 @@ Exposes
 - `Tree.filter(callback)`
 - `Tree.flatten()`
 - `Tree.paths()`
+- `Tree.levels()`

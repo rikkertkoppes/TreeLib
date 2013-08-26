@@ -139,6 +139,17 @@
         return res;
     }
 
+    function levels(tree,children) {
+        var res = [];
+        walk(tree,function(node,depth,path) {
+            if (!res[depth]) {
+                res[depth] = [];
+            }
+            res[depth].push(node);
+        },children);
+        return res;
+    }
+
     /**
      * Object wrapper for the tree, exposing the TreeLib functions as methods
      * @param {object||array} tree     tree
@@ -171,11 +182,16 @@
         return paths(this.tree,this.childrenProp);
     };
 
+    Tree.prototype.levels = function() {
+        return levels(this.tree,this.childrenProp);
+    };
+
     return {
         walk: walk,
         reverseWalk: reverseWalk,
         flatten: flatten,
         paths: paths,
+        levels: levels,
         filter: filter,
         copy: copy,
         Tree: Tree
