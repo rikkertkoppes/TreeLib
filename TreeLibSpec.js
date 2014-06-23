@@ -20,11 +20,23 @@ describe('test', function() {
         name: 'qux',
         children: [quxmoo, quxfox]
     };
+    var fooAlt = {
+        name: 'foo',
+        items: [foobar, foobaz]
+    };
+    var quxAlt = {
+        name: 'qux',
+        items: [quxmoo, quxfox]
+    };
     var testTreeNoRoot = [foo, qux];
     var testTreeWithRoot = {
         name: 'root',
         children: testTreeNoRoot
     };
+    var testTreeAltChildren = {
+        name: 'root',
+        items: [fooAlt,quxAlt]
+    }
 
     it('should pass', function() {
         expect(true).toBe(true);
@@ -56,6 +68,20 @@ describe('test', function() {
             expect(cb.calls[5].args).toEqual([quxmoo, 2, [root, qux, quxmoo]]);
             expect(cb.calls[6].args).toEqual([quxfox, 2, [root, qux, quxfox]]);
         });
+
+        it('should walk the tree with children param', function() {
+            var cb = jasmine.createSpy('cb');
+            var root = testTreeAltChildren;
+            TreeLib.walk(root, cb, 'items');
+            expect(cb.calls.length).toBe(7);
+            expect(cb.calls[0].args).toEqual([root, 0, [root]]);
+            expect(cb.calls[1].args).toEqual([fooAlt, 1, [root, fooAlt]]);
+            expect(cb.calls[2].args).toEqual([foobar, 2, [root, fooAlt, foobar]]);
+            expect(cb.calls[3].args).toEqual([foobaz, 2, [root, fooAlt, foobaz]]);
+            expect(cb.calls[4].args).toEqual([quxAlt, 1, [root, quxAlt]]);
+            expect(cb.calls[5].args).toEqual([quxmoo, 2, [root, quxAlt, quxmoo]]);
+            expect(cb.calls[6].args).toEqual([quxfox, 2, [root, quxAlt, quxfox]]);
+        })
     });
 
     describe('reversewalk', function() {
@@ -82,6 +108,20 @@ describe('test', function() {
             expect(cb.calls[3].args).toEqual([quxmoo, 2, undefined]);
             expect(cb.calls[4].args).toEqual([quxfox, 2, undefined]);
             expect(cb.calls[5].args).toEqual([qux, 1, undefined]);
+            expect(cb.calls[6].args).toEqual([root, 0, undefined]);
+        });
+
+        it('should walk the tree backwards with children param', function() {
+            var cb = jasmine.createSpy('cb');
+            var root = testTreeAltChildren;
+            TreeLib.reverseWalk(root, cb, 'items');
+            expect(cb.calls.length).toBe(7);
+            expect(cb.calls[0].args).toEqual([foobar, 2, undefined]);
+            expect(cb.calls[1].args).toEqual([foobaz, 2, undefined]);
+            expect(cb.calls[2].args).toEqual([fooAlt, 1, undefined]);
+            expect(cb.calls[3].args).toEqual([quxmoo, 2, undefined]);
+            expect(cb.calls[4].args).toEqual([quxfox, 2, undefined]);
+            expect(cb.calls[5].args).toEqual([quxAlt, 1, undefined]);
             expect(cb.calls[6].args).toEqual([root, 0, undefined]);
         });
     });
@@ -121,6 +161,26 @@ describe('test', function() {
             expect(cb.calls[3].args).toEqual([quxmoo, 2, undefined]);
             expect(cb.calls[4].args).toEqual([quxfox, 2, undefined]);
             expect(cb.calls[5].args).toEqual([qux, 1, [1, 1]]);
+            expect(cb.calls[6].args).toEqual([root, 0, [2, 2]]);
+            expect(res).toEqual(4);
+        });
+
+        it('should walk backwards while counting all items with children param', function() {
+            var cb = jasmine.createSpy('cb').andCallFake(function(node, depth, res) {
+                //return the sum of the values in res, or 1 to count this (end) node
+                return res ? res.reduce(function(p, r) {
+                    return p + r;
+                }) : 1;
+            });
+            var root = testTreeAltChildren;
+            var res = TreeLib.reverseWalk(root, cb, 'items');
+            expect(cb.calls.length).toBe(7);
+            expect(cb.calls[0].args).toEqual([foobar, 2, undefined]);
+            expect(cb.calls[1].args).toEqual([foobaz, 2, undefined]);
+            expect(cb.calls[2].args).toEqual([fooAlt, 1, [1, 1]]);
+            expect(cb.calls[3].args).toEqual([quxmoo, 2, undefined]);
+            expect(cb.calls[4].args).toEqual([quxfox, 2, undefined]);
+            expect(cb.calls[5].args).toEqual([quxAlt, 1, [1, 1]]);
             expect(cb.calls[6].args).toEqual([root, 0, [2, 2]]);
             expect(res).toEqual(4);
         });
@@ -164,6 +224,26 @@ describe('test', function() {
             expect(cb.calls[6].args).toEqual([root, 0, [12, 12]]);
             expect(res).toEqual(24);
         });
+
+        it('should walk backwards while counting all items with children param', function() {
+            var cb = jasmine.createSpy('cb').andCallFake(function(node, depth, res) {
+                //return the sum of the values in res, or the number of letters
+                return res ? res.reduce(function(p, r) {
+                    return p + r;
+                }) : node.name.length;
+            });
+            var root = testTreeAltChildren;
+            var res = TreeLib.reverseWalk(root, cb, 'items');
+            expect(cb.calls.length).toBe(7);
+            expect(cb.calls[0].args).toEqual([foobar, 2, undefined]);
+            expect(cb.calls[1].args).toEqual([foobaz, 2, undefined]);
+            expect(cb.calls[2].args).toEqual([fooAlt, 1, [6, 6]]);
+            expect(cb.calls[3].args).toEqual([quxmoo, 2, undefined]);
+            expect(cb.calls[4].args).toEqual([quxfox, 2, undefined]);
+            expect(cb.calls[5].args).toEqual([quxAlt, 1, [6, 6]]);
+            expect(cb.calls[6].args).toEqual([root, 0, [12, 12]]);
+            expect(res).toEqual(24);
+        });
     });
 
     describe('flatten', function() {
@@ -186,6 +266,16 @@ describe('test', function() {
             expect(res[5]).toEqual(quxmoo);
             expect(res[6]).toEqual(quxfox);
         });
+        it('should flatten a tree with children param', function() {
+            var res = TreeLib.flatten(testTreeAltChildren, 'items');
+            expect(res[0]).toEqual(testTreeAltChildren);
+            expect(res[1]).toEqual(fooAlt);
+            expect(res[2]).toEqual(foobar);
+            expect(res[3]).toEqual(foobaz);
+            expect(res[4]).toEqual(quxAlt);
+            expect(res[5]).toEqual(quxmoo);
+            expect(res[6]).toEqual(quxfox);
+        });
     });
 
     describe('levels', function() {
@@ -199,6 +289,13 @@ describe('test', function() {
             var res = TreeLib.levels(root);
             expect(res[0]).toEqual([root]);
             expect(res[1]).toEqual([foo, qux]);
+            expect(res[2]).toEqual([foobar, foobaz, quxmoo, quxfox]);
+        });
+        it('should get the levels of a tree with children param', function() {
+            var root = testTreeAltChildren;
+            var res = TreeLib.levels(root, 'items');
+            expect(res[0]).toEqual([root]);
+            expect(res[1]).toEqual([fooAlt, quxAlt]);
             expect(res[2]).toEqual([foobar, foobaz, quxmoo, quxfox]);
         });
     });
@@ -223,6 +320,17 @@ describe('test', function() {
             expect(res[4]).toEqual([root, qux]);
             expect(res[5]).toEqual([root, qux, quxmoo]);
             expect(res[6]).toEqual([root, qux, quxfox]);
+        });
+        it('should get the paths of a tree with children param', function() {
+            var root = testTreeAltChildren;
+            var res = TreeLib.paths(root, 'items');
+            expect(res[0]).toEqual([root]);
+            expect(res[1]).toEqual([root, fooAlt]);
+            expect(res[2]).toEqual([root, fooAlt, foobar]);
+            expect(res[3]).toEqual([root, fooAlt, foobaz]);
+            expect(res[4]).toEqual([root, quxAlt]);
+            expect(res[5]).toEqual([root, quxAlt, quxmoo]);
+            expect(res[6]).toEqual([root, quxAlt, quxfox]);
         });
     });
 
@@ -266,15 +374,20 @@ describe('test', function() {
     });
 
     describe('copy', function() {
-        it('should be equal but not the same', function() {
+        it('should be equal but not the same with root', function() {
             var copy = TreeLib.copy(testTreeWithRoot);
             expect(copy).toEqual(testTreeWithRoot);
             expect(copy).not.toBe(testTreeWithRoot);
         });
+        it('should be equal but not the same', function() {
+            var copy = TreeLib.copy(testTreeNoRoot);
+            expect(copy).toEqual(testTreeNoRoot);
+            expect(copy).not.toBe(testTreeNoRoot);
+        });
     });
 
     describe('filter', function() {
-        it('should filter nodes that do not match and do not have children', function() {
+        it('should filter nodes that do not match and do not have children with root', function() {
             var filtered = TreeLib.filter(testTreeWithRoot, function(node) {
                 return node.name === 'quxmoo';
             });
@@ -283,6 +396,23 @@ describe('test', function() {
                 children: [{
                         name: 'qux',
                         children: [{
+                                name: 'quxmoo'
+                            }
+                        ]
+                    }
+                ]
+            });
+        });
+
+        it('should filter nodes that do not match and do not have children with children param', function() {
+            var filtered = TreeLib.filter(testTreeAltChildren, function(node) {
+                return node.name === 'quxmoo';
+            }, 'items');
+            expect(filtered).toEqual({
+                name: 'root',
+                items: [{
+                        name: 'qux',
+                        items: [{
                                 name: 'quxmoo'
                             }
                         ]

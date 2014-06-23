@@ -71,7 +71,7 @@
     }
 
     /**
-     * copy function from angular.cop
+     * copy function from angular.copy
      * @param  {[type]} source      [description]
      * @param  {[type]} destination [description]
      * @return {[type]}             [description]
