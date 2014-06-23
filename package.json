@@ -1,0 +1,24 @@
+{
+  "name": "TreeLib",
+  "version": "0.0.0",
+  "description": "A bunch of function to handle trees in javascript.",
+  "main": "TreeLib.js",
+  "scripts": {
+    "test": "karma start --single-run"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rikkertkoppes/TreeLib.git"
+  },
+  "author": "rikkertkoppes",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rikkertkoppes/TreeLib/issues"
+  },
+  "homepage": "https://github.com/rikkertkoppes/TreeLib",
+  "devDependencies": {
+    "karma": "^0.12.16",
+    "karma-chrome-launcher": "^0.1.4",
+    "karma-jasmine": "^0.1.5"
+  }
+}
