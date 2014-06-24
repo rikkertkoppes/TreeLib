@@ -8,6 +8,18 @@
   }
 }(this, 'TreeLib', function factory() {
 
+    function getChildren(tree,childrenProp) {
+        var childrenFn;
+        if (typeof childrenProp === 'string' || childrenProp === undefined) {
+            childrenFn = function(item) {
+                return item[childrenProp||'children'];
+            };
+        } else {
+            childrenFn = childrenProp;
+        }
+        return childrenFn(tree)||[];
+    }
+
     /**
      * depth first tree walker
      * @param  {object||array}   tree     the tree to walk, can be an object or
@@ -23,7 +35,7 @@
                 callback(tree,depth,path);
                 depth+=1;
                 //set subtree to empty array if not exists
-                tree = tree[children||'children']||[];
+                tree = getChildren(tree,children);
             }
             //recurse the subtree
             tree.forEach(function(child) {
@@ -47,7 +59,7 @@
      */
     function reverseWalk(tree,callback,children) {
         function _walk(tree,depth) {
-            var sub = tree[children||'children']||[];
+            var sub = getChildren(tree,children);
             var res = [];
             sub.forEach(function(child) {
                 var r = _walk(child,depth+1);
@@ -98,22 +110,35 @@
         tree = copy(tree);
         children = children||'children';
 
-        function _filterNode(node) {
-            //filter children
-            node[children] = filter(node[children]||[],callback,children);
+        function purge(node,children) {
             //remove empty children
-            if (!node[children].length) {
-                delete node[children];
+            var childrenArr = getChildren(node,children);
+            if (!childrenArr.length) {
+                //todo multilevel purge
+                for (prop in node) {
+                    if (node[prop] === childrenArr) {
+                        delete node[prop]
+                    }
+                }
             }
+        }
+
+        function _filterNode(node,children) {
+            //filter children
+            var childrenArr = getChildren(node,children);
+            var filtered = filter(childrenArr,callback,children);
+            childrenArr.splice.apply(childrenArr,[].concat(0,Number.MAX_VALUE,filtered));
+            purge(node,children);
             return node;
         }
 
         if (!(tree instanceof Array)) {
-            return _filterNode(tree);
+            return _filterNode(tree,children);
         }
         return tree.filter(function(node) {
-            _filterNode(node);
-            return (callback(node) || node[children]);
+            _filterNode(node,children);
+            var childrenArr = getChildren(node,children);
+            return (callback(node) || childrenArr.length);
         });
     }
 
