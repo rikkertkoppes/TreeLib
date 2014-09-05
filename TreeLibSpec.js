@@ -445,6 +445,34 @@ describe('test', function() {
     });
 
     describe('wrapper object', function() {
+        it('should yield the same for walk', function() {
+            var tree = new TreeLib.Tree(testTreeWithRoot);
+            var list1 = [], list2 = [];
+            tree.walk(function(node){list1.push(node)});
+            TreeLib.walk(testTreeWithRoot,function(node){list2.push(node)});
+            expect(list1).toEqual(list2);
+        });
+        it('should yield the same for walk', function() {
+            var tree = new TreeLib.Tree(testTreeNoRoot);
+            var list1 = [], list2 = [];
+            tree.walk(function(node){list1.push(node)});
+            TreeLib.walk(testTreeNoRoot,function(node){list2.push(node)});
+            expect(list1).toEqual(list2);
+        });
+        it('should yield the same for reverseWalk', function() {
+            var tree = new TreeLib.Tree(testTreeWithRoot);
+            var list1 = [], list2 = [];
+            tree.reverseWalk(function(node){list1.push(node)});
+            TreeLib.reverseWalk(testTreeWithRoot,function(node){list2.push(node)});
+            expect(list1).toEqual(list2);
+        });
+        it('should yield the same for reverseWalk', function() {
+            var tree = new TreeLib.Tree(testTreeNoRoot);
+            var list1 = [], list2 = [];
+            tree.reverseWalk(function(node){list1.push(node)});
+            TreeLib.reverseWalk(testTreeNoRoot,function(node){list2.push(node)});
+            expect(list1).toEqual(list2);
+        });
         it('should yield the same for flatten', function() {
             var tree = new TreeLib.Tree(testTreeWithRoot);
             expect(tree.flatten()).toEqual(TreeLib.flatten(testTreeWithRoot));
