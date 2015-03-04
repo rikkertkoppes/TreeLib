@@ -82,6 +82,26 @@
         }
     }
 
+    function map(tree,callback,children) {
+        //maps node or array of nodes
+        function _map(node,depth) {
+            if (node instanceof Array) {
+                return node.map(function(child) {
+                    return _map(child,depth);
+                });
+            } else {
+                var children = node.children;
+                var n = callback(node,depth);
+                if (children) {
+                    n.children = _map(children,depth+1);
+                }
+                return n;
+            }
+        }
+
+        return _map(tree,0);
+    }
+
     /**
      * copy function from angular.copy
      * @param  {[type]} source      [description]
@@ -195,6 +215,10 @@
         return this;
     };
 
+    Tree.prototype.map = function(callback) {
+        return map(this.tree,callback,this.childrenProp);
+    };
+
     Tree.prototype.filter = function(callback) {
         return filter(this.tree,callback,this.childrenProp);
     };
@@ -214,6 +238,7 @@
     return {
         walk: walk,
         reverseWalk: reverseWalk,
+        map: map,
         flatten: flatten,
         paths: paths,
         levels: levels,

@@ -100,6 +100,62 @@ describe('test', function() {
         });
     });
 
+    describe('map', function() {
+        var mapper;
+        beforeEach(function() {
+            mapper = function(node,depth,path) {
+                return {
+                    depth: depth,
+                };
+            };
+        })
+        it('should map a simple node',function() {
+            expect(TreeLib.map(quxmoo,mapper)).toEqual({depth:0});
+        });
+        it('should map an array of nodes',function() {
+            expect(TreeLib.map([foobaz,quxmoo],mapper)).toEqual([{depth:0},{depth:0}]);
+        });
+        it('should map the tree without root',function() {
+            var res = TreeLib.map(testTreeNoRoot,mapper);
+            expect(res).toEqual([{
+                depth: 0,
+                children: [{
+                    depth: 1
+                },{
+                    depth: 1
+                }]
+            },{
+                depth: 0,
+                children: [{
+                    depth: 1
+                },{
+                    depth: 1
+                }]
+            }])
+        });
+        it('should map the tree with root',function() {
+            var res = TreeLib.map(testTreeWithRoot,mapper);
+            expect(res).toEqual({
+                depth: 0,
+                children: [{
+                    depth: 1,
+                    children: [{
+                        depth: 2
+                    },{
+                        depth: 2
+                    }]
+                },{
+                    depth: 1,
+                    children: [{
+                        depth: 2
+                    },{
+                        depth: 2
+                    }]
+                }]
+            })
+        });
+    });
+
     describe('reversewalk', function() {
         it('should walk the tree backwards without root', function() {
             var cb = jasmine.createSpy('cb');
@@ -472,6 +528,20 @@ describe('test', function() {
             tree.reverseWalk(function(node){list1.push(node)});
             TreeLib.reverseWalk(testTreeNoRoot,function(node){list2.push(node)});
             expect(list1).toEqual(list2);
+        });
+        it('should yield the same for map', function() {
+            var map = function(node) {
+                return {foo:'bar'};
+            };
+            var tree = new TreeLib.Tree(testTreeWithRoot);
+            expect(tree.map(map)).toEqual(TreeLib.map(testTreeWithRoot,map));
+        });
+        it('should yield the same for map', function() {
+            var map = function(node) {
+                return {foo:'bar'};
+            };
+            var tree = new TreeLib.Tree(testTreeNoRoot);
+            expect(tree.map(map)).toEqual(TreeLib.map(testTreeNoRoot,map));
         });
         it('should yield the same for flatten', function() {
             var tree = new TreeLib.Tree(testTreeWithRoot);
